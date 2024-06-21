@@ -1,3 +1,0 @@
-[submodule "terraform-aws-lambda-container"]
-	path = terraform-aws-lambda-container
-	url = https://github.com/dustindortch/terraform-aws-lambda-container

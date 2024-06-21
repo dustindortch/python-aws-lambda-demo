@@ -2,4 +2,6 @@ FROM ${DOCKER_BASE_IMAGE}
 
 COPY ${SRC_PATH} \${LAMBDA_TASK_ROOT}
 
+RUN echo "Made a change"
+
 CMD [ "${LAMBDA_HANDLER}" ]
