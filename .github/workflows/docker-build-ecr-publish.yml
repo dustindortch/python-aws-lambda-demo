@@ -64,7 +64,7 @@ jobs:
       - name: Process Dockerfile template
         id: process-dockerfile
         run: |
-          if [ ! -f ${{ env.DOCKERFILE_TEMPLATE }} ]
+          if [ ! -f ${{ env.DOCKERFILE_TEMPLATE }} ] ; then
             echo "${{ env.DOCKERFILE_TEMPLATE }} file not found.  Exiting..."
             exit 1
           fi
