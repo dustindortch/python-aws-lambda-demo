@@ -1,0 +1,78 @@
+---
+name : Docker Build and Push to AWS ECR
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    name: Build and Push
+    runs-on: ubuntu-latest
+
+    env:
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        id: credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Get version from VERSION file
+        id: version
+        run: |
+          if [ -f VERSION ]; then
+            VERSION=$(cat VERSION)
+          else
+            echo "VERSION file not found.  Exiting..."
+            exit 1
+          fi
+          echo "Current version: $VERSION"
+          echo "VERSION=$VERSION" | tee -a $GITHUB_OUTPUT
+
+      - name: Docker Build
+        id: docker-build
+        env:
+          BUILD_VERSION: ${{ steps.version.outputs.VERSION }}
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: >
+          docker build
+          --tag ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_VERSION}
+          .
+
+      - name: Docker Tag with Semantic Version
+        id: docker-tag
+        env:
+          BUILD_VERSION: ${{ steps.version.outputs.VERSION }}
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: >
+          docker tag
+          ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_VERSION}
+          ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+
+      - name: Docker Push
+        id: docker-push
+        env:
+          BUILD_VERSION: ${{ steps.version.outputs.VERSION }}
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: >
+          docker push
+          ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_VERSION}
+...
