@@ -20,7 +20,7 @@ jobs:
       DOCKERFILE_TEMPLATE: ${{ vars.DOCKERFILE_TEMPLATE || 'Dockerfile.tpl' }}
       DOCKER_BASE_IMAGE: ${{ vars.DOCKER_BASE_IMAGE || 'public.ecr.aws/lambda/python:latest' }}
       SRC_PATH: ${{ vars.SRC_PATH || './src/' }}
-      HANDLER: ${{ vars.LAMBDA_HANDLER || 'lambda.lambda_handler' }}
+      LAMBDA_HANDLER: ${{ vars.LAMBDA_HANDLER || 'lambda.lambda_handler' }}
 
     steps:
       - name: Checkout
