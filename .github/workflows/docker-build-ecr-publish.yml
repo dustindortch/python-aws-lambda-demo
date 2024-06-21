@@ -70,7 +70,11 @@ jobs:
           fi
           read -r TEMPLATE < ${{ env.DOCKERFILE_TEMPLATE }}
           eval OUTPUT="\"$TEMPLATE\""
-          echo $OUTPUT | tee -a Dockerfile
+          echo $OUTPUT > Dockerfile
+          echo "---------------------"
+          echo "Dockerfile generated:"
+          echo "---------------------"
+          cat Dockerfile
 
       - name: Docker Build
         id: docker-build
