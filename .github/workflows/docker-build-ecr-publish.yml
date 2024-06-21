@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }} # globalrmi-vpis/vpis-x-process
 
     steps:
       - name: Checkout
@@ -29,7 +29,12 @@ jobs:
         with:
           aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Get Caller Identity
+        id: caller-identity
+        run: aws sts get-caller-identity
 
       - name: Login to Amazon ECR
         id: login-ecr
