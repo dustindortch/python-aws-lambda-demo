@@ -40,6 +40,12 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Create ECR Repository
+        id: ecr-create-repo
+        run: >
+          aws ecr create-repository
+          --repository-name $ECR_REPOSITORY || true
+
       - name: Get version from VERSION file
         id: version
         run: |
