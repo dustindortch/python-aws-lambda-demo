@@ -17,6 +17,10 @@ jobs:
 
     env:
       ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }} # globalrmi-vpis/vpis-x-process
+      DOCKERFILE_TEMPLATE: ${{ vars.DOCKERFILE_TEMPLATE || 'Dockerfile.tpl' }}
+      DOCKER_BASE_IMAGE: ${{ vars.DOCKER_BASE_IMAGE || 'public.ecr.aws/lambda/python:latest' }}
+      SRC_PATH: ${{ vars.SRC_PATH || './src/' }}
+      HANDLER: ${{ vars.LAMBDA_HANDLER || 'lambda.lambda_handler' }}
 
     steps:
       - name: Checkout
@@ -49,14 +53,24 @@ jobs:
       - name: Get version from VERSION file
         id: version
         run: |
-          if [ -f VERSION ]; then
-            VERSION=$(cat VERSION)
-          else
+          if [ ! -f VERSION ]; then
             echo "VERSION file not found.  Exiting..."
             exit 1
           fi
+          VERSION=$(cat VERSION)
           echo "Current version: $VERSION"
           echo "VERSION=$VERSION" | tee -a $GITHUB_OUTPUT
+
+      - name: Process Dockerfile template
+        id: process-dockerfile
+        run: |
+          if [ ! -f ${{ env.DOCKERFILE_TEMPLATE }} ]
+            echo "${{ env.DOCKERFILE_TEMPLATE }} file not found.  Exiting..."
+            exit 1
+          fi
+          read -r TEMPLATE < ${{ env.DOCKERFILE_TEMPLATE }}
+          eval OUTPUT="\"$TEMPLATE\""
+          echo $OUTPUT | tee -a Dockerfile
 
       - name: Docker Build
         id: docker-build
